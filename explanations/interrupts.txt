@@ -1,0 +1,46 @@
+| =============================================== |
+| A signal which makes the processor stop         |
+| what it's doing in order to handle that signal. |
+| =============================================== |
+
+Can be triggered by:
+1. An Exception:
+    (e.g. dividing by zero, segmentation fault, page fault)
+
+2. Hardware:
+    (e.g. keyboard key pressed or released, timer tick,
+     disk controller finished an operation)
+
+3. Software:
+    through the INT instruction
+
+----------------------------------------------------
+
+| =========================== |
+| Examples of BIOS Interrupts |
+| =========================== |
+
+INT 10h -- Video:
+    AH = 00h -- Set Video Mode
+    AH = 01h -- Set Cursor Shape
+    AH = 02h -- Set Cursor Position
+    AH = 03h -- Get Cursor Position And Shape
+    ...
+    AH = 0Eh -- Write Character in TTY Mode:
+        AH = 0E
+        AL = ASCII character to write
+        BH = page number (text modes)
+        BL = foreground pixel color (graphics modes)
+
+        returns nothing
+
+        - cursor advances after write
+        - characters BEL (7), BS (8), LF (A), and CR (D) are treated as control codes
+    ...
+
+INT 11h -- Equipment Check
+INT 12h -- Memory Size
+INT 13h -- DISK I/O
+INT 14h -- Serial communications
+INT 15h -- Cassette
+INT 16h -- Keyboard I/O
