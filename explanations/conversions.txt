@@ -1,0 +1,7 @@
+| ===================== |
+| LBA to CHS conversion |
+| ===================== |
+
+sector = (LBA % sectors per track) + 1
+head = (LBA / sectors per track) % heads
+cylinder = (LBA / sectors per track) / heads
