@@ -74,14 +74,39 @@ main:
     mov ss, ax
     mov sp, 0x7C00      ; Stack grows downwards from where we are loaded in memory
 
+    ; Read something from floppy disk
+    ; BIOS should set DL to drive number
+    mov [ebr_drive_number], dl
+
+    mov ax, 1           ; LBA=1, second sector from disk
+    mov cl, 1           ; 1 sector to read
+    mov bx, 0x7E00      ; Data should be after the bootloader
+    call disk_read
+
     ; Print message
     mov si, msg_hello
     call puts
 
     hlt
 
+;
+; Error handlers
+;
+
+floppy_error:
+    mov si, msg_read_failed
+    call puts
+    jmp wait_key_and_reboot
+
+wait_key_and_reboot:
+    mov ah, 0
+    int 16h                 ; Wait for keypress
+    jmp 0FFFFh:0            ; Jump to beginning of BIOS, should reboot 
+    hlt
+
 .halt:
-    jmp .halt
+    cli                     ; Disabled interrupts, this way CPU can't get out of "halt" state
+    hlt
 
 ;
 ; Disk routines
@@ -129,11 +154,63 @@ lba_to_chs:
 ;   - es:bx: memory address where to store read data
 ;
 disk_read:
+    push ax                             ; Save registers we will modify
+    push bx
+    push cx
+    push dx
+    push di
+
     push cx                             ; Temporarily save CL (number of sectors to read)
     call lba_to_chs                     ; Compute CHS
     pop ax                              ; AL = numbers of sectors to read
 
-msg_hello: db 'Hello World! How is World?', ENDL, 0
+    mov ah, 02h
+    mov di, 3
+
+.retry:
+    pusha                               ; Save all registers, we don't know what BIOS modifies
+    stc                                 ; Set carry flag, some BIOS'es don't set it
+    int 13h                             ; Carry flag cleared = success
+    jnc .done                           ; Jump if carry not set
+
+    ; Read failed
+    popa
+    call disk_reset
+
+    dec di
+    test di, di
+    jnz .retry
+
+.fail:
+    ; All attempts are exhausted
+    jmp floppy_error
+
+.done:
+    popa
+
+    push di
+    push dx
+    push cx
+    push bx
+    push ax                             ; Restore registers we will modify
+    ret
+
+;
+; Resets disk controller
+; Parameters:
+;   - dl: drive number
+;
+disk_reset:
+    pusha
+    mov ah, 0
+    stc
+    int 13h
+    jc floppy_error
+    popa
+    ret
+
+msg_hello:              db 'Hello World! How is World?', ENDL, 0
+msg_read_failed:        db 'Read from disk failed!', ENDL, 0
 
 times 510-($-$$) db 0
 dw 0AA55h
