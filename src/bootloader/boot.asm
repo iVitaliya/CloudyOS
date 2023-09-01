@@ -87,6 +87,7 @@ main:
     mov si, msg_hello
     call puts
 
+    cli                 ; Disabled interrupts, this way CPU can't get out of "halt" state
     hlt
 
 ;
@@ -188,11 +189,11 @@ disk_read:
 .done:
     popa
 
-    push di
-    push dx
-    push cx
-    push bx
-    push ax                             ; Restore registers we will modify
+    pop di
+    pop dx
+    pop cx
+    pop bx
+    pop ax                             ; Restore registers we will modify
     ret
 
 ;
