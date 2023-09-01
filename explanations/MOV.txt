@@ -1,0 +1,5 @@
+MOV dst, src
+    - Moves from source to destination
+
+    This is equivalent to this statement in C:
+        dst = src;

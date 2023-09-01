@@ -1,0 +1,4 @@
+Bootloader
+    - loads basic components into memory
+    - puts system in expected state
+    - collects information about system
