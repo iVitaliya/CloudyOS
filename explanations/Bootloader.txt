@@ -2,3 +2,25 @@ Bootloader
     - loads basic components into memory
     - puts system in expected state
     - collects information about system
+
+Boot jump instruction
+    - Oem identifier: MSWIN4.1
+    - Bytes per sector: 512
+    - Sectors per cluster: 1
+    - Reserved sectors: 1
+    - Fat count: 2
+    - Dir entry count: 224
+    - Total sectors: 2880
+    
+    Media descriptor type
+    - Sectors per fat: 9
+    - Sectors per track: 18
+    - Heads: 2
+    - Hidden sectors: 0
+    - Large sector count: 0
+
+    Definitions:
+        - Reserved: 1
+        - File allocation tables: 18 = Fat count * Sectors per fat
+        - Root directory: 14 = (Dir entry count * 32 + Bytes per sector - 1) / Bytes per sector
+        - Data
